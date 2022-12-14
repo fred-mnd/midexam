@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 struct food{
 	char name[100];
@@ -58,11 +59,19 @@ int orderFood(customer* cust, char name[], int dish){
 	if(dish<1) return 3;
 	else if(dish>curr->dish) return 2;
 	else{
-		food* node=createFood(name, curr->price*dish, dish);
-		if(!cust->oHead) cust->oHead = cust->oTail =node;
+		food* currFood=cust->oHead;
+		while(currFood&&strcmp(currFood->name, name)!=0) currFood=currFood->next;
+		if(currFood){
+			currFood->dish+=dish;
+			currFood->price+=curr->price*dish;
+		}
 		else{
-			cust->oTail->next=node;
-			cust->oTail=node;
+			food* node=createFood(name, curr->price*dish, dish);
+			if(!cust->oHead) cust->oHead = cust->oTail =node;
+			else{
+				cust->oTail->next=node;
+				cust->oTail=node;
+			}
 		}
 	}
 	curr->dish-=dish;
@@ -154,6 +163,21 @@ customer* customerCheck(char query[]){
 
 //----------------------------------------------------------------
 
+void os(){
+	#ifdef _WIN32
+    printf("Windows OS.\n");
+  
+	#elif __APPLE__
+    printf("Mac OS.\n");
+  
+
+	#elif __linux__
+    printf("Linux OS.\n");
+
+	#else
+	printf("Others\n");
+	#endif
+}
 void mainMenu();
 void addDish();
 void removeDish();
@@ -171,6 +195,13 @@ int main(){
 
 void mainMenu(){
 	system("cls");
+	printf("System: ");
+	os();
+	struct tm* ptr;
+	time_t t=time(NULL);
+	ptr=localtime (&t);
+	printf( "%s\n", asctime(ptr));
+	
 	puts("1. Add Dish");
 	puts("2. Remove Dish");
 	puts("3. Add Customer");
@@ -278,7 +309,7 @@ void viewWarteg(){
 			curr=curr->next;
 		}
 	}
-	if(count==1) puts("There is no customer yet.");
+	if(count==1) puts("There is no customers yet.");
 	printf("Press enter to continue...");
 	scanf("[^\n]"); getchar();
 	mainMenu();
@@ -325,7 +356,7 @@ void payment(){
 		printf("Insert the customer's index: ");
 		scanf("%d",&index); getchar();
 		if(cHead[index]) break;
-		puts("There is nocustomer with the index.");
+		puts("There is no customers with the index.");
 	} while(true);
 	customer* curr=cHead[index];
 	int totalPrice=0;
